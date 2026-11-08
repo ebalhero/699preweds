@@ -1,13 +1,374 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { siteConfig, getWhatsAppUrl } from "./config/siteConfig";
+import {
+  LimitedTimeOfferHeadingSvg,
+  Price699Svg,
+  LilacCheckBadgeSvg,
+  FilmsAndMomentsHeadingSvg,
+  OurSignatureFilmsHeadingSvg,
+} from "./components/DesignVectors";
 
-const COUNTDOWN_STORAGE_KEY = "lxfilms_sg1999_promo_deadline_v1";
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const COUNTDOWN_STORAGE_KEY = "preweds_699_promo_deadline_v1";
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000;
 
-const SERIF_STYLE = {
-  fontFamily: "'Cormorant Garamond', Georgia, serif",
-  fontVariantNumeric: "lining-nums",
+/**
+ * Arial font style for all Body Text
+ */
+const ARIAL_STYLE = {
+  fontFamily: "Arial, Helvetica, sans-serif",
 };
+
+/**
+ * Fraunces font style for 11.11 display numerals in the pop-out modal
+ */
+const FRAUNCES_STYLE = {
+  fontFamily: "'Fraunces Variable', 'Fraunces', Georgia, serif",
+  fontVariationSettings: "'opsz' 72, 'SOFT' 30, 'WONK' 1",
+};
+
+/**
+ * Individual photo & card layers extracted from 2.svg and 4.svg with exact coordinates
+ */
+const SLIDE2_TOP_PHOTOS = [
+  {
+    name: "s2_p1",
+    src: "images/preweds/s2_p1.webp",
+    top: "13.616%",
+    left: "14.219%",
+    width: "24.942%",
+    delay: 60,
+    direction: "left",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s2_p2",
+    src: "images/preweds/s2_p2.webp",
+    top: "11.903%",
+    left: "54.079%",
+    width: "44.056%",
+    delay: 150,
+    direction: "right",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_p3",
+    src: "images/preweds/s2_p3.webp",
+    top: "25.182%",
+    left: "1.632%",
+    width: "44.639%",
+    delay: 120,
+    direction: "left",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_p4",
+    src: "images/preweds/s2_p4.webp",
+    top: "26.558%",
+    left: "46.154%",
+    width: "38.578%",
+    delay: 210,
+    direction: "right",
+    animClass: "animate-photo-float",
+  },
+];
+
+const SLIDE2_TILTED_CARDS = [
+  {
+    name: "s2_card_mid",
+    src: "images/preweds/s2_card_mid.webp",
+    top: "37.423%",
+    left: "34.615%",
+    width: "33.333%",
+    delay: 80,
+    direction: "scale",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s2_card_right",
+    src: "images/preweds/s2_card_right.webp",
+    top: "37.254%",
+    left: "63.170%",
+    width: "36.480%",
+    delay: 180,
+    direction: "right",
+    animClass: "animate-card-sway-right",
+  },
+  {
+    name: "s2_card_left",
+    src: "images/preweds/s2_card_left.webp",
+    top: "37.170%",
+    left: "0.117%",
+    width: "38.578%",
+    delay: 140,
+    direction: "left",
+    animClass: "animate-card-sway-left",
+  },
+];
+
+const SLIDE2_BEACH_COLLAGE = [
+  {
+    name: "s2_c1",
+    src: "images/preweds/s2_c1.webp",
+    top: "67.996%",
+    left: "1.515%",
+    width: "29.604%",
+    delay: 60,
+    direction: "left",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s2_c2",
+    src: "images/preweds/s2_c2.webp",
+    top: "69.315%",
+    left: "81.469%",
+    width: "16.200%",
+    delay: 140,
+    direction: "right",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_c4",
+    src: "images/preweds/s2_c4.webp",
+    top: "76.755%",
+    left: "64.918%",
+    width: "32.984%",
+    delay: 200,
+    direction: "right",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s2_c3",
+    src: "images/preweds/s2_c3.webp",
+    top: "74.453%",
+    left: "46.387%",
+    width: "26.923%",
+    delay: 120,
+    direction: "scale",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_c5",
+    src: "images/preweds/s2_c5.webp",
+    top: "80.039%",
+    left: "1.515%",
+    width: "9.674%",
+    delay: 160,
+    direction: "left",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_c7",
+    src: "images/preweds/s2_c7.webp",
+    top: "87.788%",
+    left: "36.014%",
+    width: "26.807%",
+    delay: 240,
+    direction: "up",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s2_c6",
+    src: "images/preweds/s2_c6.webp",
+    top: "85.682%",
+    left: "20.280%",
+    width: "19.231%",
+    delay: 180,
+    direction: "left",
+    animClass: "animate-photo-float",
+  },
+];
+
+const SLIDE4_FEEDBACK_LAYERS = [
+  {
+    name: "s4_top1",
+    src: "images/preweds/s4_top1.webp",
+    top: "10.353%",
+    left: "5.071%",
+    width: "46.108%",
+    delay: 50,
+    direction: "left",
+    animClass: "animate-card-sway-left",
+  },
+  {
+    name: "s4_top2",
+    src: "images/preweds/s4_top2.webp",
+    top: "13.855%",
+    left: "42.571%",
+    width: "51.297%",
+    delay: 120,
+    direction: "right",
+    animClass: "animate-card-sway-right",
+  },
+  {
+    name: "s4_top3",
+    src: "images/preweds/s4_top3.webp",
+    top: "21.115%",
+    left: "1.533%",
+    width: "53.066%",
+    delay: 180,
+    direction: "left",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s4_top4",
+    src: "images/preweds/s4_top4.webp",
+    top: "22.725%",
+    left: "39.741%",
+    width: "56.368%",
+    delay: 240,
+    direction: "right",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s4_top5",
+    src: "images/preweds/s4_top5.webp",
+    top: "31.621%",
+    left: "13.797%",
+    width: "52.005%",
+    delay: 300,
+    direction: "up",
+    animClass: "animate-card-sway-left",
+  },
+  {
+    name: "s4_grid1",
+    src: "images/preweds/s4_grid1.webp",
+    top: "60.532%",
+    left: "2.005%",
+    width: "30.425%",
+    delay: 60,
+    direction: "up",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s4_grid2",
+    src: "images/preweds/s4_grid2.webp",
+    top: "60.506%",
+    left: "33.844%",
+    width: "30.071%",
+    delay: 120,
+    direction: "up",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s4_grid3",
+    src: "images/preweds/s4_grid3.webp",
+    top: "60.506%",
+    left: "65.330%",
+    width: "30.307%",
+    delay: 180,
+    direction: "up",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s4_grid4",
+    src: "images/preweds/s4_grid4.webp",
+    top: "71.421%",
+    left: "2.005%",
+    width: "30.425%",
+    delay: 90,
+    direction: "up",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s4_grid5",
+    src: "images/preweds/s4_grid5.webp",
+    top: "71.421%",
+    left: "33.844%",
+    width: "30.071%",
+    delay: 150,
+    direction: "up",
+    animClass: "animate-photo-float",
+  },
+  {
+    name: "s4_grid6",
+    src: "images/preweds/s4_grid6.webp",
+    top: "71.421%",
+    left: "65.330%",
+    width: "29.953%",
+    delay: 210,
+    direction: "up",
+    animClass: "animate-photo-float-reverse",
+  },
+  {
+    name: "s4_bot1",
+    src: "images/preweds/s4_bot1.webp",
+    top: "80.598%",
+    left: "14.387%",
+    width: "39.387%",
+    delay: 140,
+    direction: "left",
+    animClass: "animate-card-sway-left",
+  },
+  {
+    name: "s4_bot2",
+    src: "images/preweds/s4_bot2.webp",
+    top: "81.084%",
+    left: "41.509%",
+    width: "41.627%",
+    delay: 220,
+    direction: "right",
+    animClass: "animate-card-sway-right",
+  },
+];
+
+/**
+ * Lightweight IntersectionObserver scroll-reveal component
+ */
+function Reveal({
+  children,
+  className = "",
+  style = {},
+  delay = 0,
+  direction = "up",
+}) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -15px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const hiddenTransform =
+    direction === "left"
+      ? "translate3d(-22px, 8px, 0) scale(0.96)"
+      : direction === "right"
+        ? "translate3d(22px, 8px, 0) scale(0.96)"
+        : direction === "scale"
+          ? "scale(0.92)"
+          : "translate3d(0, 16px, 0) scale(0.98)";
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        ...style,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translate3d(0, 0, 0) scale(1)" : hiddenTransform,
+        transition: `opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 700ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
+        willChange: "opacity, transform",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 function getOrCreateDeadline() {
   try {
@@ -19,11 +380,11 @@ function getOrCreateDeadline() {
         return parsed;
       }
     }
-    const nextDeadline = now + SEVEN_DAYS_MS;
+    const nextDeadline = now + THREE_DAYS_MS;
     localStorage.setItem(COUNTDOWN_STORAGE_KEY, String(nextDeadline));
     return nextDeadline;
   } catch {
-    return Date.now() + SEVEN_DAYS_MS;
+    return Date.now() + THREE_DAYS_MS;
   }
 }
 
@@ -41,50 +402,15 @@ function getRemainingParts(deadline) {
   };
 }
 
-/**
- * Animated Diagonal Ticker Ribbon (2000 SGD OFF)
- * Matches Slide 12 alternating thin/light and heavy/bold "2000 SGD OFF"
- */
-function AnimatedPromoRibbon({ angle = -4.7, className = "" }) {
-  const items = Array.from({ length: 12 });
-  return (
-    <div
-      className={`pointer-events-none absolute left-1/2 z-20 w-[135%] -translate-x-1/2 overflow-hidden bg-[#d40038] py-[5px] shadow-[0_6px_18px_rgba(0,0,0,0.45)] ${className}`}
-      style={{ transform: `rotate(${angle}deg)` }}
-    >
-      <div className="animate-marquee-left flex items-center whitespace-nowrap">
-        {items.map((_, idx) => {
-          const isBold = idx % 2 === 1;
-          return (
-            <span
-              key={idx}
-              className={`mx-3 inline-block font-sans uppercase text-white ${
-                isBold
-                  ? "text-[18.5px] font-extrabold tracking-[-0.02em]"
-                  : "text-[20px] font-light tracking-[-0.01em] text-white/95"
-              }`}
-            >
-              {siteConfig.priceOffer.ribbonText}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Rich Text Renderer helper for inline bold/italic segments
- */
-function RichSegments({ segments }) {
+function RichTextLine({ segments }) {
   return (
     <>
-      {segments.map((seg, i) => (
+      {segments.map((seg, idx) => (
         <span
-          key={i}
-          className={`${
-            seg.bold ? "font-bold text-white" : "font-light text-white/95"
-          } ${seg.italic ? "italic" : ""}`}
+          key={idx}
+          className={
+            seg.bold ? "font-bold text-black" : "font-normal text-black"
+          }
         >
           {seg.text}
         </span>
@@ -93,341 +419,513 @@ function RichSegments({ segments }) {
   );
 }
 
-/**
- * Slide 19: Package Details Card (100% matching Slide 19 Canva SVG design)
- */
-function PackageCard({ pkg }) {
+function WhatsAppIcon({ className = "h-5 w-5" }) {
   return (
-    <div className="w-full text-[#151515]">
-      {/* Top Full-Width Yellow Banner */}
-      <div
-        className="w-full py-[8px] text-center text-[13.5px] font-bold tracking-[-0.01em]"
-        style={{
-          ...SERIF_STYLE,
-          backgroundColor: "#fae053",
-          color: "#151515",
-        }}
-      >
-        {pkg.topBanner}
-      </div>
-
-      {/* Main Cream Card Body */}
-      <div className="w-full bg-[#f4f2ed] px-[38px] pt-[18px] pb-[20px]">
-        {/* Header Row: Left Title & Subtitle | Right Price & Red Strikethrough NP */}
-        <div className="flex items-start justify-between">
-          {/* Left: Priority Premium Photo & Video */}
-          <div className="text-left">
-            <h3
-              className="text-[23px] leading-[1.04] tracking-[-0.02em] text-[#181818]"
-              style={SERIF_STYLE}
-            >
-              <span className="font-normal italic">{pkg.titleItalic}</span>
-              <span className="font-medium">{pkg.titleRegular1}</span>
-              <br />
-              <span className="font-medium">{pkg.titleLine2}</span>
-            </h3>
-            <p
-              className="mt-[6px] text-[12px] leading-none italic text-[#222222]"
-              style={SERIF_STYLE}
-            >
-              {pkg.subtitleItalic}
-            </p>
-          </div>
-
-          {/* Right: SGD 1999 & NP : SGD 3999 */}
-          <div className="pt-[2px] text-right">
-            <div
-              className="text-[28px] leading-none font-normal tracking-[-0.02em] text-[#181818]"
-              style={SERIF_STYLE}
-            >
-              {pkg.price}
-            </div>
-            <div className="mt-[4px] font-sans text-[10.5px] font-normal tracking-[0.01em] text-[#e05245]">
-              <span>{pkg.normalPriceLabel}</span>
-              <span className="line-through decoration-[#e05245] decoration-[1.2px]">
-                {pkg.normalPriceValue}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Single-Column PHOTOGRAPHY Section */}
-        <div className="mt-[18px] text-left">
-          <h4
-            className="text-[10.5px] font-medium tracking-[0.06em] text-[#181818] uppercase"
-            style={SERIF_STYLE}
-          >
-            {pkg.photographyHeading}
-          </h4>
-          <ul
-            className="mt-[6px] space-y-[1.5px] text-[12px] leading-[1.26] text-[#181818]"
-            style={SERIF_STYLE}
-          >
-            {pkg.photographyItems.map((item, idx) => (
-              <li
-                key={idx}
-                className={
-                  item.bold ? "font-bold italic text-[#0d0d0d]" : "font-normal italic text-[#222222]"
-                }
-              >
-                {item.text}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Single-Column VIDEOGRAPHY Section */}
-        <div className="mt-[16px] text-left">
-          <h4
-            className="text-[10.5px] font-medium tracking-[0.06em] text-[#181818] uppercase"
-            style={SERIF_STYLE}
-          >
-            {pkg.videographyHeading}
-          </h4>
-          <ul
-            className="mt-[6px] space-y-[1.5px] text-[12px] leading-[1.26] text-[#181818]"
-            style={SERIF_STYLE}
-          >
-            {pkg.videographyItems.map((item, idx) => (
-              <li
-                key={idx}
-                className={
-                  item.bold ? "font-bold italic text-[#0d0d0d]" : "font-normal italic text-[#222222]"
-                }
-              >
-                {item.text}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Single-Column FREEGIFT Section */}
-        <div className="mt-[18px] text-left">
-          <h5
-            className="text-[10.5px] font-medium tracking-[0.06em] text-[#181818] uppercase"
-            style={SERIF_STYLE}
-          >
-            {pkg.freeGiftHeading}
-          </h5>
-          <ul
-            className="mt-[6px] pl-[4px] space-y-[1.5px] text-[12px] leading-[1.26] text-[#181818]"
-            style={SERIF_STYLE}
-          >
-            {pkg.freeGiftItems.map((gift, idx) => (
-              <li key={idx} className="italic">
-                {gift.boldPrefix && (
-                  <span className="font-bold text-[#0d0d0d]">
-                    {gift.boldPrefix}
-                  </span>
-                )}
-                <span className="font-normal text-[#222222]">{gift.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Bottom Exclusive by lxFILMS Logo */}
-        <div className="mt-[18px] flex justify-center">
-          <img
-            src="images/sg1999/logo_exclusive_lxfilms_dark.webp"
-            alt="exclusive by lxFILMS"
-            className="h-[19px] w-auto object-contain opacity-90"
-            loading="lazy"
-          />
-        </div>
-      </div>
-    </div>
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.359 4.984L2 22l5.188-1.359c1.453.797 3.109 1.219 4.843 1.219 5.516 0 9.969-4.453 9.969-9.969S17.547 2 12.031 2zm5.828 14.125c-.25.703-1.453 1.344-2.016 1.422-.516.078-1.172.109-1.906-.125-.453-.141-1.031-.328-1.766-.641-3.094-1.344-5.109-4.469-5.266-4.672-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.312.609-.391.812-.391.203 0 .406.016.578.016.188 0 .438-.078.688.516.25.609.859 2.094.938 2.25.078.156.125.344.031.547-.094.203-.141.328-.297.5-.156.172-.312.391-.453.516-.141.141-.297.297-.125.594.172.297.766 1.266 1.641 2.047 1.125 1 2.078 1.312 2.375 1.469.297.156.469.125.641-.078.172-.203.734-.859.938-1.156.203-.297.391-.25.656-.156.266.094 1.688.797 1.984.938.297.141.484.219.562.344.078.125.078.719-.172 1.422z" />
+    </svg>
   );
 }
 
 /**
- * Top Non-Sticky Countdown Bar (Atas Sekali, Non-Sticky)
+ * 11.11 Promo Pop-Out Modal (Harmonious with User's Cream + Pastel Lilac + Editorial Black Design)
  */
-function TopCountdownBar() {
-  const [deadline, setDeadline] = useState(() => getOrCreateDeadline());
-  const [timeLeft, setTimeLeft] = useState(() => getRemainingParts(deadline));
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = Date.now();
-      if (now >= deadline) {
-        const next = getOrCreateDeadline();
-        setDeadline(next);
-        setTimeLeft(getRemainingParts(next));
-      } else {
-        setTimeLeft(getRemainingParts(deadline));
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [deadline]);
-
-  if (!siteConfig.topCountdownBar?.enabled) return null;
-
-  const { label, daysLabel, hoursLabel, minutesLabel, secondsLabel } =
-    siteConfig.topCountdownBar;
-
-  const units = [
-    { val: timeLeft.days, lbl: daysLabel },
-    { val: timeLeft.hours, lbl: hoursLabel },
-    { val: timeLeft.minutes, lbl: minutesLabel },
-    { val: timeLeft.seconds, lbl: secondsLabel, active: true },
-  ];
+function Promo1111Modal({ isOpen, onClose, waUrl, timeLeft }) {
+  if (!isOpen) return null;
+  const { promoPopup1111 } = siteConfig;
 
   return (
-    <div className="relative w-full bg-gradient-to-r from-[#140408] via-[#24060e] to-[#140408] px-3 py-2.5 text-center">
-      <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1">
-        <span className="font-sans text-[10.5px] font-bold tracking-[0.06em] text-white/90 uppercase">
-          {label}
-        </span>
-        <div className="flex items-center gap-1">
-          {units.map((u, idx) => (
-            <React.Fragment key={idx}>
-              <div
-                className={`flex items-baseline gap-0.5 rounded-[6px] px-1.5 py-0.5 font-sans tabular-nums ${
-                  u.active
-                    ? "bg-[#ce0037] text-white shadow-[0_0_10px_rgba(206,0,55,0.6)]"
-                    : "bg-white/10 text-white"
-                }`}
-              >
-                <span className="text-[12px] font-extrabold leading-none">
-                  {u.val}
-                </span>
-                <span className="text-[8.5px] font-medium text-white/80 uppercase">
-                  {u.lbl}
-                </span>
-              </div>
-              {idx < units.length - 1 && (
-                <span className="text-[10px] font-bold text-white/40">:</span>
-              )}
-            </React.Fragment>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-[4px]"
+      onClick={onClose}
+    >
+      <div
+        className="animate-modal-pop relative w-full max-w-[366px] overflow-hidden rounded-[32px] border border-black bg-[#fffbf2] px-5 pt-6 pb-5 text-center text-[#1b1b1b] shadow-[0_10px_0_#e1cfe1,0_24px_60px_rgba(0,0,0,0.35)]"
+        style={ARIAL_STYLE}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Subtle Shimmer Sweep */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]">
+          <div className="animate-shimmer-sweep h-full w-1/3 bg-gradient-to-r from-transparent via-white/75 to-transparent" />
+        </div>
+
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Tutup"
+          className="absolute top-3.5 right-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-black bg-white text-[14px] font-bold text-black transition hover:bg-[#e1cfe1]"
+        >
+          ✕
+        </button>
+
+        {/* Top 11.11 Lilac Badge */}
+        <div className="relative inline-flex items-center gap-1.5 rounded-full border border-black bg-[#e1cfe1] px-3 py-1 text-[10px] font-bold tracking-[0.08em] text-black uppercase">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d42b3e] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d42b3e]" />
+          </span>
+          {promoPopup1111.topBadge}
+        </div>
+
+        {/* Big Editorial "11.11" Headline */}
+        <div className="relative mt-2">
+          <h2
+            className="text-[58px] leading-[0.88] font-light italic tracking-[-0.04em] text-[#1b1b1b]"
+            style={FRAUNCES_STYLE}
+          >
+            {promoPopup1111.headline}
+          </h2>
+          <p className="mt-1 text-[13.5px] font-bold tracking-[0.02em] text-black uppercase">
+            {promoPopup1111.subHeadline}
+          </p>
+        </div>
+
+        {/* Price Cut Box inside Modal: $899 -> $699 */}
+        <div className="relative mt-3.5 rounded-[22px] border border-black bg-white px-4 py-3.5">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-[12.5px] text-black/65">
+              {promoPopup1111.normalPriceLabel}
+            </span>
+            <span className="relative inline-block text-[18px] font-bold text-black/45">
+              {promoPopup1111.oldPrice}
+              <span className="absolute inset-x-[-6%] top-1/2 h-[2px] -rotate-6 bg-[#d42b3e]" />
+            </span>
+            <span className="rounded-full border border-black bg-[#e1cfe1] px-2.5 py-0.5 text-[10.5px] font-bold text-black">
+              {promoPopup1111.saveBadge}
+            </span>
+          </div>
+
+          <p className="mt-1 text-[13px] text-black">
+            {promoPopup1111.nowOnlyLabel}
+          </p>
+
+          <div className="mt-0.5 flex justify-center">
+            <Price699Svg className="animate-float-slow h-[52px] w-auto" />
+          </div>
+        </div>
+
+        {/* 3 FREE Gifts Pills inside Modal */}
+        <div className="relative mt-3.5 space-y-2 text-left">
+          {promoPopup1111.freeGifts.map((g, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2.5 rounded-full border border-black bg-white px-3.5 py-2"
+            >
+              <LilacCheckBadgeSvg className="h-[24px] w-[24px] shrink-0" />
+              <p className="text-[13.5px] leading-tight text-black">
+                <span className="font-bold">{g.bold}</span>
+                <span>{g.text}</span>
+              </p>
+            </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
 
-/**
- * Spinning / Counting Number Reel Animation that rolls down and lands on targetNumber (5)
- */
-function SpinningSlotNumber({ target = 5 }) {
-  // Sequence of numbers that spin/roll vertically before landing on 5
-  const reelNumbers = [
-    24,
-    21,
-    18,
-    15,
-    13,
-    11,
-    10,
-    9,
-    8,
-    7,
-    6,
-    target,
-  ];
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [settled, setSettled] = useState(false);
-
-  useEffect(() => {
-    let step = 0;
-    const totalSteps = reelNumbers.length - 1;
-    let timeoutId;
-
-    const runStep = () => {
-      if (step < totalSteps) {
-        step += 1;
-        setCurrentIndex(step);
-        // Gradually slow down like a real spinning wheel / odometer counting down to 5
-        const delay = 55 + Math.pow(step / totalSteps, 2.2) * 210;
-        timeoutId = setTimeout(runStep, delay);
-      } else {
-        setSettled(true);
-      }
-    };
-
-    timeoutId = setTimeout(runStep, 180);
-    return () => clearTimeout(timeoutId);
-  }, [target]);
-
-  return (
-    <div className="my-3 flex items-center justify-center">
-      <div
-        className={`relative flex h-[88px] w-[88px] items-center justify-center overflow-hidden rounded-[22px] border transition-all duration-300 ${
-          settled
-            ? "scale-105 border-[#ff4d79]/80 bg-gradient-to-b from-[#ce0037] to-[#820022] shadow-[0_0_32px_rgba(206,0,55,0.65),inset_0_1px_2px_rgba(255,255,255,0.4)]"
-            : "border-white/30 bg-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]"
-        }`}
-      >
-        {/* Vertical Odometer Drum Strip */}
-        <div
-          className="absolute inset-x-0 top-0 flex flex-col items-center transition-transform duration-150 ease-out"
-          style={{
-            transform: `translateY(-${currentIndex * 88}px)`,
-          }}
-        >
-          {reelNumbers.map((num, idx) => (
+        {/* Mini Live Countdown inside 11.11 Modal */}
+        <div className="relative mt-3.5 grid grid-cols-4 gap-1.5">
+          {[
+            { v: timeLeft.days, l: "Days", hi: false },
+            { v: timeLeft.hours, l: "Hours", hi: false },
+            { v: timeLeft.minutes, l: "Mins", hi: false },
+            { v: timeLeft.seconds, l: "Secs", hi: true },
+          ].map((u, idx) => (
             <div
               key={idx}
-              className="flex h-[88px] w-full items-center justify-center font-sans text-[48px] leading-none font-extrabold tracking-tight text-white tabular-nums"
+              className={`flex flex-col items-center justify-center rounded-[14px] border border-black py-1.5 ${
+                u.hi ? "bg-[#e1cfe1]" : "bg-white"
+              }`}
             >
-              {num}
+              <span className="text-[18px] leading-none font-bold text-black tabular-nums">
+                {u.v}
+              </span>
+              <span className="mt-0.5 text-[9.5px] text-black/75">{u.l}</span>
             </div>
           ))}
         </div>
+
+        {/* Claim 11.11 WhatsApp CTA Button */}
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="animate-cta-breath group relative mt-4 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full border border-black bg-[#1b1b1b] py-3.5 text-[15px] font-bold text-white transition hover:bg-black"
+        >
+          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+            <span className="animate-shimmer-sweep block h-full w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          </span>
+          <WhatsAppIcon className="relative h-5 w-5 text-[#25D366]" />
+          <span className="relative">{promoPopup1111.buttonText}</span>
+        </a>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="relative mt-2.5 inline-block text-[12px] text-black/65 underline underline-offset-4 transition hover:text-black"
+        >
+          {promoPopup1111.dismissText}
+        </button>
       </div>
     </div>
   );
 }
 
 /**
- * Slide 20 Top: Live 7-Day Countdown Section
+ * Harmonious Urgency Slide:
+ * - Limited Time Offer vector heading
+ * - Price Cut from $899 to $699
+ * - 3 FREE Gift Pills (matching Slide 3 cream pills + lilac scalloped checkmarks)
+ * - Live Countdown Timer
+ * - WhatsApp Now CTA Button
  */
-function PromoCountdownSection() {
-  const [deadline, setDeadline] = useState(() => getOrCreateDeadline());
-  const [timeLeft, setTimeLeft] = useState(() => getRemainingParts(deadline));
+function UrgencyOfferSection({ waUrl, timeLeft }) {
+  const { urgencySection } = siteConfig;
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = Date.now();
-      if (now >= deadline) {
-        const next = getOrCreateDeadline();
-        setDeadline(next);
-        setTimeLeft(getRemainingParts(next));
-      } else {
-        setTimeLeft(getRemainingParts(deadline));
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [deadline]);
-
-  const boxes = [
-    { value: timeLeft.days, label: "Hari", highlight: false },
-    { value: timeLeft.hours, label: "Jam", highlight: false },
-    { value: timeLeft.minutes, label: "Minit", highlight: false },
-    { value: timeLeft.seconds, label: "Saat", highlight: true },
+  const countdownBoxes = [
+    {
+      value: timeLeft.days,
+      label: urgencySection.countdownUnits.days,
+      highlight: false,
+    },
+    {
+      value: timeLeft.hours,
+      label: urgencySection.countdownUnits.hours,
+      highlight: false,
+    },
+    {
+      value: timeLeft.minutes,
+      label: urgencySection.countdownUnits.minutes,
+      highlight: false,
+    },
+    {
+      value: timeLeft.seconds,
+      label: urgencySection.countdownUnits.seconds,
+      highlight: true,
+    },
   ];
 
   return (
-    <section className="relative w-full bg-[#000000] px-5 pt-6 pb-8 text-center">
-      {/* 4 Glassmorphic Countdown Boxes */}
-      <div className="mx-auto grid max-w-[356px] grid-cols-4 gap-2.5">
-        {boxes.map((b, idx) => (
-          <div
-            key={idx}
-            className={`relative flex flex-col items-center justify-center rounded-[16px] border py-3 backdrop-blur-md transition-all ${
-              b.highlight
-                ? "border-[#ff4d79]/80 bg-gradient-to-b from-[#d40038] to-[#900024] shadow-[0_0_24px_rgba(212,0,56,0.55)]"
-                : "border-white/25 bg-gradient-to-b from-white/[0.15] to-white/[0.05] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_8px_20px_rgba(0,0,0,0.5)]"
-            }`}
-          >
-            <span className="font-sans text-[28px] leading-none font-bold tracking-tight text-white tabular-nums">
-              {b.value}
+    <section
+      className="relative w-full overflow-hidden bg-gradient-to-b from-white via-[#faf7f0]/70 to-white px-[6.5%] pt-[42px] pb-[48px] text-[#1b1b1b]"
+      style={ARIAL_STYLE}
+    >
+      {/* Top Small Pill Badge */}
+      <Reveal delay={0} className="flex justify-center">
+        <span className="animate-float-slow inline-flex items-center gap-1.5 rounded-full border border-black bg-[#e1cfe1]/65 px-3.5 py-1 text-[2.6cqw] font-bold tracking-[0.08em] text-black uppercase">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d42b3e] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d42b3e]" />
+          </span>
+          {urgencySection.topBadge}
+        </span>
+      </Reveal>
+
+      {/* Original Design Font Vector Heading: "limited / time offer!" */}
+      <Reveal delay={80} className="mt-3 w-full">
+        <LimitedTimeOfferHeadingSvg className="mx-auto h-auto w-full" />
+      </Reveal>
+
+      {/* Price Cut Card: $899 -> $699 */}
+      <Reveal delay={150} direction="scale" className="mt-5">
+        <div className="relative overflow-hidden rounded-[28px] border border-black bg-[#fffbf2] px-5 py-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+          {/* Subtle Shimmer Sweep across the Promo Card */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px]">
+            <div className="animate-shimmer-sweep h-full w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+          </div>
+
+          {/* Normal Price $899 Strikethrough + Save $200 Pill */}
+          <div className="relative flex items-center justify-center gap-2.5">
+            <span className="text-[3.5cqw] font-normal text-black/65">
+              {urgencySection.normalPriceLabel}
             </span>
-            <span className="mt-1.5 font-sans text-[10px] font-medium tracking-[0.08em] text-white/85 uppercase">
-              {b.label}
+            <span className="relative inline-block text-[5.4cqw] font-bold tracking-[-0.02em] text-black/45">
+              {urgencySection.oldPrice}
+              <span className="absolute inset-x-[-6%] top-1/2 h-[2px] -rotate-6 bg-[#d42b3e]" />
+            </span>
+            <span className="animate-pulse rounded-full border border-black bg-[#e1cfe1] px-2.5 py-0.5 text-[2.8cqw] font-bold tracking-[-0.01em] text-black">
+              {urgencySection.saveBadge}
             </span>
           </div>
+
+          {/* "Now Only," in Arial */}
+          <p className="relative mt-2 text-[4.2cqw] leading-none font-normal tracking-[-0.02em] text-black">
+            {urgencySection.nowOnlyLabel}
+          </p>
+
+          {/* Exact "$699" Vector from 1.svg */}
+          <div className="relative mt-1 flex justify-center">
+            <Price699Svg className="animate-float-slow h-[15.2cqw] w-auto" />
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Subtitle above the 3 FREE Gift Pills */}
+      <Reveal delay={200}>
+        <p className="mt-6 text-center text-[3.9cqw] font-normal tracking-[-0.015em] text-black">
+          {urgencySection.freeGiftsSubtitle}
+        </p>
+      </Reveal>
+
+      {/* 3 Alternating Pill Cards matching 3.svg 100% */}
+      <div className="mt-3.5 flex flex-col gap-3">
+        {urgencySection.freeGifts.map((gift, idx) => (
+          <Reveal
+            key={idx}
+            delay={240 + idx * 110}
+            direction={gift.align === "right" ? "right" : "left"}
+            className={`flex w-[84%] items-center gap-3.5 rounded-full border border-black bg-[#fffbf2] px-4 py-3 transition-transform duration-300 hover:-translate-y-0.5 ${
+              gift.align === "right" ? "self-end" : "self-start"
+            }`}
+          >
+            <LilacCheckBadgeSvg className="animate-badge-pop h-[8.2cqw] w-[8.2cqw] shrink-0" />
+            <div className="text-left text-[4.65cqw] leading-[1.06] tracking-[-0.02em] text-black">
+              <p>
+                <RichTextLine segments={gift.line1} />
+              </p>
+              <p>
+                <RichTextLine segments={gift.line2} />
+              </p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      {/* Countdown Timer */}
+      <Reveal delay={320} className="mt-7 text-center">
+        <p className="text-[3.5cqw] font-bold tracking-[0.04em] text-black uppercase">
+          {urgencySection.countdownLabel}
+        </p>
+
+        <div className="mt-2.5 grid grid-cols-4 gap-2.5">
+          {countdownBoxes.map((box, idx) => (
+            <div
+              key={idx}
+              className={`flex flex-col items-center justify-center rounded-[20px] border border-black py-3 transition-all duration-300 ${
+                box.highlight
+                  ? "bg-[#e1cfe1] shadow-[0_4px_14px_rgba(225,207,225,0.65)]"
+                  : "bg-[#fffbf2]"
+              }`}
+            >
+              <span
+                key={box.highlight ? box.value : undefined}
+                className={`text-[6.8cqw] leading-none font-bold tracking-[-0.03em] text-black tabular-nums ${
+                  box.highlight ? "animate-sec-tick" : ""
+                }`}
+              >
+                {box.value}
+              </span>
+              <span className="mt-1 text-[2.7cqw] font-normal tracking-[0.02em] text-black/80">
+                {box.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* Primary WhatsApp Now CTA Button */}
+      <Reveal delay={400} className="mt-7 flex flex-col items-center">
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="animate-cta-breath group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-black bg-[#1b1b1b] py-4 text-[4.8cqw] font-bold tracking-[-0.01em] text-white transition-all hover:bg-black active:translate-y-0.5"
+        >
+          {/* Shimmer light sweep across CTA button */}
+          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+            <span className="animate-shimmer-sweep block h-full w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          </span>
+          <WhatsAppIcon className="relative h-[5.4cqw] w-[5.4cqw] text-[#25D366] transition-transform duration-300 group-hover:scale-115" />
+          <span className="relative">{urgencySection.ctaButtonText}</span>
+        </a>
+        <p className="mt-3 text-center text-[3.1cqw] font-normal text-black/70">
+          {urgencySection.ctaSubtext}
+        </p>
+      </Reveal>
+    </section>
+  );
+}
+
+/**
+ * Individual Ultra-Fast Video Card:
+ * 1. Initial load: 0 KB video (only ~15 KB WebP poster)
+ * 2. In viewport (IntersectionObserver): auto-plays ~200 KB 6-second muted loop instantly
+ * 3. Tap Play: streams full HD FastStart MP4 with sound immediately via HTTP Range Requests
+ */
+function FastVideoCard({ video, index, activeVideoId, onSelectVideo }) {
+  const cardRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  const isPlayingFull = activeVideoId === video.id;
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: "250px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Reveal
+      delay={index * 120}
+      direction={index % 2 === 1 ? "right" : "left"}
+      className="w-full"
+    >
+      <div
+        ref={cardRef}
+        className="group relative overflow-hidden rounded-[22px] border border-black bg-[#fffbf2] p-2.5 shadow-[0_6px_0_#1b1b1b] transition-transform duration-300 hover:-translate-y-0.5"
+        style={ARIAL_STYLE}
+      >
+        {/* Top Editorial Header Row */}
+        <div className="mb-2 flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center justify-center rounded-full border border-black bg-[#e1cfe1] px-2.5 py-0.5 text-[2.8cqw] font-bold text-black">
+              {video.number}
+            </span>
+            <div>
+              <h3 className="text-[4.1cqw] leading-tight font-bold tracking-[-0.02em] text-black">
+                {video.couple}
+              </h3>
+              <p className="text-[2.7cqw] leading-tight text-black/65">
+                {video.styleTag}
+              </p>
+            </div>
+          </div>
+
+          <span className="rounded-full border border-black/80 bg-white px-2.5 py-0.5 text-[2.6cqw] font-bold tabular-nums text-black">
+            {isPlayingFull ? "PLAYING HD" : video.duration}
+          </span>
+        </div>
+
+        {/* 16:9 Video Frame */}
+        <div className="relative aspect-video w-full overflow-hidden rounded-[16px] border border-black bg-[#1b1b1b]">
+          {isPlayingFull ? (
+            <video
+              key="full-video"
+              src={video.fullSrc}
+              poster={video.poster}
+              controls
+              autoPlay
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => onSelectVideo(video.id)}
+              className="relative block h-full w-full cursor-pointer text-left focus:outline-none"
+              aria-label={`Play ${video.couple} Full Highlight Film`}
+            >
+              {/* Instant WebP Poster + Lazy 6s Muted Preview Loop */}
+              {inView ? (
+                <video
+                  key="preview-loop"
+                  src={video.previewSrc}
+                  poster={video.poster}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <img
+                  src={video.poster}
+                  alt={video.couple}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              )}
+
+              {/* Subtle Cinematic Gradient Overlay */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+
+              {/* Top-left Live Preview Indicator */}
+              <div className="pointer-events-none absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full border border-white/40 bg-black/55 px-2.5 py-1 text-[2.4cqw] font-bold tracking-[0.04em] text-white backdrop-blur-xs">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#e1cfe1]" />
+                <span>PREVIEW • TAP FOR SOUND</span>
+              </div>
+
+              {/* Center Play Button with Harmonious Cream & Lilac Styling */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-black bg-[#fffbf2]/95 text-black shadow-[0_4px_0_#1b1b1b] transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#e1cfe1]">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="ml-0.5 h-5 w-5"
+                  >
+                    <path d="M8 5.14v14l11-7-11-7z" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Bottom CTA Bar inside Video */}
+              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 flex items-center justify-between text-white">
+                <span className="text-[3.1cqw] font-bold drop-shadow-xs">
+                  Watch Full Film ({video.duration})
+                </span>
+                <span className="rounded-full border border-black bg-[#fffbf2] px-2.5 py-0.5 text-[2.5cqw] font-bold text-black">
+                  Play HD 🔊
+                </span>
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/**
+ * Section showcasing the 3 Preweds Highlight Films
+ */
+function PrewedsVideoShowcaseSection() {
+  const { videoSection } = siteConfig;
+  const [activeVideoId, setActiveVideoId] = useState(null);
+
+  if (!videoSection || !videoSection.videos?.length) return null;
+
+  return (
+    <section
+      className="relative w-full overflow-hidden bg-white px-[6.5%] pt-4 pb-8"
+      style={ARIAL_STYLE}
+    >
+      {/* Original Vector Heading "our signature / films!" using the exact SVG title font */}
+      <Reveal delay={80} className="mx-auto w-[74%]">
+        <OurSignatureFilmsHeadingSvg className="h-auto w-full" />
+      </Reveal>
+
+      <Reveal delay={140} className="mt-1.5 text-center">
+        <p className="text-[3.5cqw] font-normal tracking-[-0.01em] text-black/75">
+          {videoSection.subtitle}
+        </p>
+      </Reveal>
+
+      {/* 3 Video Cards */}
+      <div className="mt-5 flex flex-col gap-4">
+        {videoSection.videos.map((video, idx) => (
+          <FastVideoCard
+            key={video.id}
+            video={video}
+            index={idx}
+            activeVideoId={activeVideoId}
+            onSelectVideo={(id) => setActiveVideoId(id)}
+          />
         ))}
       </div>
     </section>
@@ -435,1098 +933,330 @@ function PromoCountdownSection() {
 }
 
 export function App() {
-  const [showUrgencyModal, setShowUrgencyModal] = useState(
-    () => siteConfig.urgencyPopup?.enabled ?? false
-  );
+  const { hero, timelessSection, affordableSection, urgencySection } =
+    siteConfig;
   const waUrl = getWhatsAppUrl();
 
-  // Exact card text positions for Slide 6 (8 Glassmorphic Deliverable Cards)
-  const deliverablePositions = [
-    { top: "18.8%", left: "15.8%", width: "28%" },
-    { top: "19.8%", left: "56.5%", width: "31%" },
-    { top: "39.7%", left: "17.2%", width: "28%" },
-    { top: "39.7%", left: "59.9%", width: "28%" },
-    { top: "59.3%", left: "17.2%", width: "30%" },
-    { top: "59.5%", left: "59.9%", width: "28%" },
-    { top: "79.2%", left: "17.2%", width: "28%" },
-    { top: "79.2%", left: "60.4%", width: "28%" },
-  ];
+  const [show1111Modal, setShow1111Modal] = useState(
+    () => siteConfig.promoPopup1111?.enabled ?? true
+  );
+  const [deadline, setDeadline] = useState(() => getOrCreateDeadline());
+  const [timeLeft, setTimeLeft] = useState(() => getRemainingParts(deadline));
 
-  // Exact positions for Slide 7 (5 Free Gifts)
-  const freeGiftTopPositions = ["20.6%", "31.8%", "43.4%", "54.6%", "66.2%"];
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      if (now >= deadline) {
+        const next = getOrCreateDeadline();
+        setDeadline(next);
+        setTimeLeft(getRemainingParts(next));
+      } else {
+        setTimeLeft(getRemainingParts(deadline));
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [deadline]);
 
   return (
-    <div className="min-h-screen w-full bg-[#000000] text-white selection:bg-[#f8da45] selection:text-black">
-      {/* Pop-Out Urgency Modal (Tinggal 5 Slot Sahaja Lagi Available + Animasi Pusing ke 5) */}
-      {showUrgencyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-5 backdrop-blur-md">
-          <div className="relative w-full max-w-[350px] overflow-hidden rounded-[24px] border border-white/20 bg-gradient-to-b from-[#1a1c20] to-[#0d0e11] px-6 pt-7 pb-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.25)]">
-            <button
-              type="button"
-              onClick={() => setShowUrgencyModal(false)}
-              aria-label="Tutup"
-              className="absolute top-3.5 right-3.5 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/15 hover:text-white"
-            >
-              ✕
-            </button>
+    <div
+      className="min-h-screen w-full bg-white text-[#1b1b1b] selection:bg-[#1b1b1b] selection:text-white"
+      style={ARIAL_STYLE}
+    >
+      {/* 11.11 Promo Pop-Out Modal */}
+      <Promo1111Modal
+        isOpen={show1111Modal}
+        onClose={() => setShow1111Modal(false)}
+        waUrl={waUrl}
+        timeLeft={timeLeft}
+      />
 
-            {/* Small Badge Label */}
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#ce0037]/50 bg-[#ce0037]/15 px-3 py-1">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#ff3366]" />
-              <span className="font-sans text-[10px] font-bold tracking-[0.12em] text-[#ff809f] uppercase">
-                {siteConfig.urgencyPopup.topLabel}
-              </span>
-            </div>
-
-            {/* "Tinggal" */}
-            <p
-              className="mt-3 text-[28px] leading-none font-semibold italic tracking-[-0.03em] text-white/95"
-              style={SERIF_STYLE}
-            >
-              {siteConfig.urgencyPopup.prefixText}
-            </p>
-
-            {/* Spinning / Counting Number 5 */}
-            <SpinningSlotNumber
-              target={siteConfig.urgencyPopup.targetNumber || 5}
-            />
-
-            {/* "Slot Sahaja Lagi Available!" */}
-            <h2 className="font-sans text-[20px] leading-[1.2] font-bold tracking-[-0.02em] text-white">
-              <span className="text-[#ff4d79]">
-                {siteConfig.urgencyPopup.slotWord}{" "}
-              </span>
-              <span>{siteConfig.urgencyPopup.suffixText}</span>
-            </h2>
-
-            <p className="mt-2.5 font-sans text-[13px] leading-[1.4] font-light text-white/80">
-              {siteConfig.urgencyPopup.subText}
-            </p>
-
-            {/* Book Now Button */}
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 flex w-full items-center justify-center rounded-full border border-white/35 bg-[#ce0037] py-3.5 font-sans text-[16px] font-bold tracking-[-0.01em] text-white shadow-[0_8px_24px_rgba(206,0,55,0.5)] transition-transform hover:brightness-110 active:scale-[0.98]"
-            >
-              {siteConfig.urgencyPopup.buttonText}
-            </a>
-
-            <button
-              type="button"
-              onClick={() => setShowUrgencyModal(false)}
-              className="mt-3 inline-block font-sans text-[12px] font-light text-white/55 underline underline-offset-4 transition hover:text-white/90"
-            >
-              {siteConfig.urgencyPopup.dismissText}
-            </button>
-          </div>
-        </div>
+      {/* Floating 11.11 Trigger Pill when modal is closed */}
+      {!show1111Modal && (
+        <button
+          type="button"
+          onClick={() => setShow1111Modal(true)}
+          className="animate-float-slow fixed right-3 bottom-4 z-40 flex items-center gap-1.5 rounded-full border border-black bg-[#e1cfe1] px-3.5 py-2 text-[12px] font-bold text-black shadow-[0_4px_0_#1b1b1b,0_8px_20px_rgba(0,0,0,0.2)] transition hover:bg-[#fffbf2]"
+        >
+          <span className="h-2 w-2 animate-ping rounded-full bg-[#d42b3e]" />
+          <span>11.11 Promo $699</span>
+        </button>
       )}
 
-      {/* Mobile-First Canvas Container (max-w-[430px] centered, seamless black background) */}
-      <main className="mx-auto w-full max-w-[430px] overflow-hidden bg-[#000000]">
-        {/* TOP NON-STICKY COUNTDOWN BAR */}
-        <TopCountdownBar />
+      {/* Mobile-First Canvas Container matching 100% of the user's SVG design */}
+      <main
+        className="mx-auto w-full max-w-[430px] overflow-hidden bg-white shadow-[0_0_50px_rgba(0,0,0,0.06)]"
+        style={{ containerType: "inline-size" }}
+      >
         {/* =====================================================================
-            SLIDE 1: HERO SECTION (Exclusive 9 Hours Wedding Photo & Video Coverage — 1999 SGD)
+            SECTION 1 (1.svg): PREWEDS / POSTWEDS ONLY $699
+            - Original Title & Heading Graphics in s1_bg.webp
+            - Body Text in Real Editable Arial
+            - Animated Hero Arch Couple Photo (s1_photo.webp)
            ===================================================================== */}
-        <section className="relative w-full">
+        <section className="relative w-full overflow-hidden">
           <img
-            src="images/sg1999/s1_hero_bg.webp"
-            alt="Exclusive 9 Hours Wedding Photo & Video Coverage"
+            src="images/preweds/s1_bg.webp"
+            alt="Preweds Postweds Only $699 Photography & Videography"
             className="block h-auto w-full select-none"
             fetchpriority="high"
           />
 
-          {/* Top 4-Line Editorial Serif Title */}
-          <div className="absolute inset-x-0 top-[4.8%] flex flex-col items-center text-center">
-            <h1
-              className="text-[35px] leading-[0.92] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold">
-                {siteConfig.hero.titleLine1Regular}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.hero.titleLine1Italic}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.hero.titleLine2Regular}
-              </span>
-              <br />
-              <span className="font-semibold italic">
-                {siteConfig.hero.titleLine3Italic}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.hero.titleLine4Regular}
-              </span>
-            </h1>
-          </div>
-
-          {/* "no hidden charge, no extra charge" in serif right above the 3D Glass Pill */}
-          <div className="absolute inset-x-0 top-[60.3%] text-center">
-            <p
-              className="text-[16px] leading-[1.05] font-medium tracking-[-0.03em] whitespace-pre-line text-white"
-              style={SERIF_STYLE}
-            >
-              {siteConfig.hero.priceLabel}
-            </p>
-          </div>
-
-          {/* "1999 SGD" centered inside the 3D Glassmorphic Pill */}
-          <div className="absolute inset-x-0 top-[66.15%] flex h-[7.56%] items-center justify-center">
-            <span className="font-sans text-[38px] font-black leading-none tracking-[-0.03em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-              {siteConfig.hero.priceValue}
-            </span>
-          </div>
-
-          {/* Bottom 2 Emotional Paragraphs */}
-          <div className="absolute top-[75.3%] right-[6%] left-[6%] space-y-[15px] text-center font-sans text-[13.5px] leading-[1.35] font-light tracking-[-0.015em] text-white/95">
-            <p className="whitespace-pre-line">{siteConfig.hero.para1}</p>
-            <p className="whitespace-pre-line">{siteConfig.hero.para2}</p>
-          </div>
-
-          {/* Bottom "exclusive by" in italic serif next to lxFILMS logo */}
-          <span
-            className="absolute bottom-[2.6%] left-[35.5%] text-[14.5px] font-normal italic tracking-[-0.02em] text-white/95"
-            style={SERIF_STYLE}
+          {/* "Only," (Arial Body Text) */}
+          <div
+            className="animate-soft-fade-up absolute inset-x-0 top-[17.6%] text-center text-[4.42cqw] leading-none font-normal tracking-[-0.02em] text-black"
+            style={{ ...ARIAL_STYLE, animationDelay: "100ms" }}
           >
-            {siteConfig.hero.exclusiveBy}
-          </span>
+            {hero.onlyLabel}
+          </div>
+
+          {/* Body Text: No Hidden Fee / Included Transportation Fee / 2 Hours Coverage (Arial) */}
+          <div
+            className="animate-soft-fade-up absolute inset-x-0 top-[40.5%] text-center text-[4.65cqw] leading-[1.06] font-normal tracking-[-0.02em] text-black"
+            style={{ ...ARIAL_STYLE, animationDelay: "240ms" }}
+          >
+            {hero.details.map((line, idx) => (
+              <p key={idx}>{line}</p>
+            ))}
+          </div>
+
+          {/* Animated Arch Couple Photo Layer (s1_photo.webp) */}
+          <Reveal
+            delay={180}
+            direction="up"
+            className="absolute top-[50.0%] left-0 w-full overflow-hidden rounded-t-[14.7cqw]"
+          >
+            <img
+              src="images/preweds/s1_photo.webp"
+              alt="Couple on Beach"
+              className="animate-hero-photo block h-auto w-full select-none"
+            />
+          </Reveal>
         </section>
 
         {/* =====================================================================
-            SLIDE 2: PREMIUM FILMS CLASSIC VIBES + 6-PHOTO MOSAIC
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s2_classic_bg.webp"
-            alt="Premium Films Classic Vibes"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Title (2 upright lines) */}
-          <div className="absolute inset-x-0 top-[6.2%] px-4 text-center">
-            <h2
-              className="text-[35px] leading-[0.94] font-semibold tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span>{siteConfig.classicVibes.titleLine1}</span>
-              <br />
-              <span>{siteConfig.classicVibes.titleLine2}</span>
-            </h2>
-          </div>
-
-          {/* Body Paragraph */}
-          <div className="absolute top-[18.6%] right-[6%] left-[6%] text-center font-sans text-[14px] leading-[1.32] font-light tracking-[-0.015em] text-white/95">
-            <p className="whitespace-pre-line">{siteConfig.classicVibes.body}</p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 3: TRUSTED BY 100+ COUPLES + 4 WIDESCREEN STILLS
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s3_trusted_bg.webp"
-            alt="Trusted by 100+ Couples"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Title */}
-          <div className="absolute inset-x-0 top-[5.2%] px-4 text-center">
-            <h2
-              className="text-[34px] leading-[0.96] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold">
-                {siteConfig.trustedCouples.titleRegular}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.trustedCouples.titleItalic}
-              </span>
-            </h2>
-          </div>
-
-          {/* Body Paragraph */}
-          <div className="absolute top-[12.2%] right-[6%] left-[6%] text-center font-sans text-[14px] leading-[1.32] font-light tracking-[-0.015em] text-white/95">
-            <p className="whitespace-pre-line">
-              {siteConfig.trustedCouples.body}
-            </p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 4: WHY CHOOSE US INSTEAD OF OTHERS? + 100% MONEY BACK GUARANTEE
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s4_why_bg.webp"
-            alt="Why Choose Us Instead of Others"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Title */}
-          <div className="absolute inset-x-0 top-[6.6%] px-4 text-center">
-            <h2
-              className="text-[34px] leading-[0.96] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold">
-                {siteConfig.whyChooseUs.titleLine1Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.whyChooseUs.titleLine1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.whyChooseUs.titleLine1Suffix}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.whyChooseUs.titleLine2Regular}
-              </span>
-            </h2>
-          </div>
-
-          {/* 5 Checklist Items next to 3D Green Checkmarks */}
-          {siteConfig.whyChooseUs.items.map((item, idx) => (
-            <div
-              key={idx}
-              className="absolute right-[3%] left-[25.8%] text-left font-sans text-[13.5px] leading-[1.24] tracking-[-0.015em] whitespace-pre-line text-white"
-              style={{ top: item.top }}
-            >
-              <RichSegments segments={item.segments} />
-            </div>
-          ))}
-
-          {/* Center Reassurance Paragraph */}
-          <div className="absolute top-[70.0%] right-[6%] left-[6%] text-center font-sans text-[13.8px] leading-[1.28] tracking-[-0.015em] whitespace-pre-line text-white">
-            <span className="font-light text-white/95">
-              {siteConfig.whyChooseUs.reassurancePrefix}
-            </span>
-            <span className="font-bold text-white">
-              {siteConfig.whyChooseUs.reassuranceBold}
-            </span>
-          </div>
-
-          {/* Bold Guarantee Text next to Gold Seal Badge */}
-          <div className="absolute top-[80.6%] right-[4%] left-[39.4%] text-left font-sans text-[12.5px] leading-[1.24] font-bold tracking-[-0.015em] text-white">
-            <p className="whitespace-pre-line">
-              {siteConfig.whyChooseUs.guaranteeBold}
-            </p>
-          </div>
-
-          {/* Bottom Footnote */}
-          <div className="absolute inset-x-0 top-[93.1%] text-center font-sans text-[8.2px] font-light tracking-[-0.01em] text-white/85">
-            <p>{siteConfig.whyChooseUs.footnote}</p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 5: OUR APPROACH + COUPLE BY CLASSIC CAR
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s5_approach_bg.webp"
-            alt="Our Approach"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Title */}
-          <div className="absolute inset-x-0 top-[4.8%] px-4 text-center">
-            <h2
-              className="text-[36px] leading-[0.95] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold italic">
-                {siteConfig.ourApproach.titleItalic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.ourApproach.titleRegular}
-              </span>
-            </h2>
-          </div>
-
-          {/* Two Paragraphs */}
-          <div className="absolute top-[12.4%] right-[6%] left-[6%] space-y-[16px] text-center font-sans text-[14px] leading-[1.3] font-light tracking-[-0.015em] text-white/95">
-            <p className="whitespace-pre-line">
-              {siteConfig.ourApproach.para1}
-            </p>
-            <p className="whitespace-pre-line">
-              {siteConfig.ourApproach.para2}
-            </p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 6: APA YANG KORANG AKAN DAPAT (8 GLASSMORPHIC CARDS)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s6_deliverables_bg.webp"
-            alt="Apa yang korang akan dapat"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Section Heading */}
-          <div className="absolute inset-x-0 top-[2.8%] text-center">
-            <h2
-              className="text-[34px] leading-[0.94] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold">
-                {siteConfig.deliverables.titleLine1Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.deliverables.titleLine1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.deliverables.titleLine1Suffix}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.deliverables.titleLine2Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.deliverables.titleLine2Italic}
-              </span>
-            </h2>
-          </div>
-
-          {/* 8 Deliverable Card Text Overlays */}
-          {siteConfig.deliverables.cards.map((segments, idx) => {
-            const pos = deliverablePositions[idx];
-            return (
-              <div
-                key={idx}
-                className="absolute text-left font-sans text-[13px] leading-[1.22] tracking-[-0.015em] whitespace-pre-line text-white"
-                style={{ top: pos.top, left: pos.left, width: pos.width }}
-              >
-                <RichSegments segments={segments} />
-              </div>
-            );
-          })}
-
-          {/* Bottom Footnotes */}
-          <div className="absolute inset-x-0 bottom-[2.6%] space-y-[2px] text-center font-sans text-[11px] leading-[1.28] tracking-[-0.015em] text-white/95">
-            <p className="font-light">
-              {siteConfig.deliverables.footnoteLine1}
-            </p>
-            <p>
-              <span className="font-light">
-                {siteConfig.deliverables.footnoteLine2Prefix}
-              </span>
-              <span className="font-bold">
-                {siteConfig.deliverables.footnoteLine2Bold}
-              </span>
-            </p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 7: IF YOU BOOK TODAY! SEMUA NI FREE JE (5 FREE GIFTS)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s7_freegifts_bg.webp"
-            alt="If You Book Today Semua ni FREE Je"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Heading */}
-          <div className="absolute inset-x-0 top-[5.2%] text-center">
-            <h2
-              className="text-[34px] leading-[0.96] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
-            >
-              <span className="font-semibold">
-                {siteConfig.freeGifts.titleLine1Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.freeGifts.titleLine1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.freeGifts.titleLine1Suffix}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.freeGifts.titleLine2Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.freeGifts.titleLine2Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.freeGifts.titleLine2Suffix}
-              </span>
-            </h2>
-          </div>
-
-          {/* 5 Free Gift Card Text Overlays */}
-          {siteConfig.freeGifts.items.map((item, idx) => (
-            <div
-              key={idx}
-              className="absolute right-[5%] left-[35.1%] flex flex-col justify-center text-left font-sans tracking-[-0.015em]"
-              style={{ top: freeGiftTopPositions[idx] }}
-            >
-              <p className="text-[13.8px] leading-[1.2] font-normal text-white">
-                {item.line1}
-              </p>
-              <p className="text-[13.8px] leading-[1.2] font-normal text-white">
-                {item.line2}
-              </p>
-              <p className="mt-[3px] text-[11.5px] leading-[1.2] font-light italic text-white/90">
-                {item.worth}
-              </p>
-            </div>
-          ))}
-        </section>
-
-        {/* =====================================================================
-            SLIDE 8: ALBUM & FRAME SHOWCASE 1
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s8_album_frame_bg.webp"
-            alt="Custom Premium Leather Engraved Album and Frame"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top-right annotation */}
-          <div className="absolute top-[2.9%] left-[52.1%] text-left font-sans text-[14px] leading-[1.25] font-light tracking-[-0.015em] whitespace-pre-line text-white/95">
-            {siteConfig.albumShowcase.topLabel}
-          </div>
-
-          {/* Bottom-left annotation */}
-          <div className="absolute bottom-[2.6%] left-[3.5%] text-left font-sans text-[14px] leading-[1.25] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.albumShowcase.bottomLabel}
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 9: ALBUM SPREADS SHOWCASE 2
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s9_album_spreads_bg.webp"
-            alt="12x8 Inch 20 Pages Matte & Glossy Finishing"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Bottom-left annotation */}
-          <div className="absolute top-[85.2%] left-[3.2%] text-left font-sans text-[13.5px] leading-[1.25] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.albumShowcase.leftLabel}
-          </div>
-
-          {/* Bottom-right annotation */}
-          <div className="absolute top-[89.2%] right-[3%] left-[55.5%] text-center font-sans text-[13.5px] leading-[1.28] font-light tracking-[-0.015em] whitespace-pre-line text-white/95">
-            {siteConfig.albumShowcase.rightLabel}
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 10: DRONE SHOTS & PROMO VALUE (3499 SGD -> 1999 SGD)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s10_drone_promo_bg.webp"
-            alt="Drone Shots and Total Value Promo"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* "drone shots" label next to arrow */}
-          <div className="absolute top-[42.4%] left-[4.5%] font-sans text-[13.5px] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.promoValue.arrowLabel}
-          </div>
-
-          {/* Promo Value Copy Overlaid on PROMO Watermark */}
-          <div className="absolute top-[52.4%] right-[6%] left-[11.2%] space-y-[20px] text-left font-sans">
-            {/* Headline with Crimson Red Highlight Box on 1999 SGD. */}
-            <p className="text-[20.5px] leading-[1.18] tracking-[-0.025em] whitespace-pre-line">
-              <span className="font-bold text-white/65">
-                {siteConfig.promoValue.headlineMuted1}
-              </span>
-              <span className="font-bold text-white">
-                {siteConfig.promoValue.headlineBold1}
-              </span>
-              <span className="font-bold text-white/65">
-                {siteConfig.promoValue.headlineMuted2}
-              </span>
-              <span className="font-bold text-white">
-                {siteConfig.promoValue.headlineBold2}
-              </span>
-              <span className="inline-block bg-[#ce0037] px-[5px] py-[1px] font-bold text-white">
-                {siteConfig.promoValue.headlineHighlight}
-              </span>
-            </p>
-
-            {/* Paragraph 1 */}
-            <p className="text-[13.8px] leading-[1.32] font-light tracking-[-0.015em] whitespace-pre-line text-white/80">
-              {siteConfig.promoValue.para1}
-            </p>
-
-            {/* Paragraph 2 */}
-            <p className="text-[13.8px] leading-[1.32] tracking-[-0.015em] whitespace-pre-line">
-              <span className="font-light text-white/80">
-                {siteConfig.promoValue.para2Muted}
-              </span>
-              <span className="font-bold text-white">
-                {siteConfig.promoValue.para2Bold}
-              </span>
-            </p>
-
-            {/* Paragraph 3 */}
-            <p className="text-[13.8px] leading-[1.32] tracking-[-0.015em] whitespace-pre-line">
-              <span className="font-light text-white/80">
-                {siteConfig.promoValue.para3Prefix}
-              </span>
-              <span className="font-bold text-white">
-                {siteConfig.promoValue.para3Bold}
-              </span>
-              <span className="font-light text-white/80">
-                {siteConfig.promoValue.para3Suffix}
-              </span>
-            </p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 11: 10-PHOTO MASONRY GRID
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s11_masonry_top.webp"
-            alt="Wedding Portfolio Masonry Grid"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 12: 3999 SGD -> 1999 SGD OFFER + ANIMATED TICKER RIBBONS
+            SECTION 2 (2.svg): TIMELESS + FILMS & MOMENTS
+            - Original Title Graphics in s2_bg.webp
+            - 15 Individual Animated Photo & Card Layers
+            - Body Text Labels in Real Editable Arial
            ===================================================================== */}
         <section className="relative w-full overflow-hidden">
           <img
-            src="images/sg1999/s12_offer_bg.webp"
-            alt="Promo 1999 SGD Offer"
+            src="images/preweds/s2_bg.webp"
+            alt="Timeless Films & Moments"
             className="block h-auto w-full select-none"
             loading="lazy"
           />
 
-          {/* Top Animated Diagonal Ribbon */}
-          <AnimatedPromoRibbon angle={-4.72} className="top-[25.0%]" />
-
-          {/* Left-aligned Description Text below 1999 SGD Pill */}
-          <div className="absolute top-[51.2%] right-[8%] left-[13.2%] space-y-[18px] text-left font-sans text-[14.5px] leading-[1.28] font-normal tracking-[-0.015em] text-white/95">
-            <p className="whitespace-pre-line">
-              <span>{siteConfig.priceOffer.para1Prefix}</span>
-              <span className="font-bold text-white">
-                {siteConfig.priceOffer.para1Bold}
-              </span>
-              <span>{siteConfig.priceOffer.para1Suffix}</span>
-            </p>
-            <p className="whitespace-pre-line">{siteConfig.priceOffer.para2}</p>
-            <p className="whitespace-pre-line">{siteConfig.priceOffer.para3}</p>
-          </div>
-
-          {/* Bottom Animated Diagonal Ribbon */}
-          <AnimatedPromoRibbon angle={4.91} className="bottom-[14.8%]" />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 13: MAKE WEDDING FINE ART AND FUN (COLLAGE)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s13_fine_art_fun.webp"
-            alt="Make Wedding Fine Art And Fun"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 14: GOLD BAROQUE FRAME SHOWCASE
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s14_gold_frame_bg.webp"
-            alt="Mastered Through Years of Shooting in Singapore Gold Frame"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top 4-Line Editorial Quote */}
-          <div className="absolute inset-x-0 top-[4.5%] px-4 text-center">
-            <h2
-              className="text-[28px] leading-[0.98] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
+          {/* 4 Top Editorial Photos ((001) - (004)) with Scroll Reveal + Floating Motion */}
+          {SLIDE2_TOP_PHOTOS.map((p) => (
+            <Reveal
+              key={p.name}
+              delay={p.delay}
+              direction={p.direction}
+              className="absolute"
+              style={{ top: p.top, left: p.left, width: p.width }}
             >
-              <span className="font-semibold italic">
-                {siteConfig.emotionalQuote.line1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.emotionalQuote.line1Regular}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.emotionalQuote.line2Regular}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.emotionalQuote.line2Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.emotionalQuote.line2Suffix}
-              </span>
-              <br />
-              <span className="font-semibold italic">
-                {siteConfig.emotionalQuote.line3Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.emotionalQuote.line3Regular}
-              </span>
-              <br />
-              <span className="font-semibold italic">
-                {siteConfig.emotionalQuote.line4Italic}
-              </span>
-            </h2>
-          </div>
-        </section>
+              <img
+                src={p.src}
+                alt={p.name}
+                className={`${p.animClass} block h-auto w-full select-none`}
+                loading="lazy"
+              />
+            </Reveal>
+          ))}
 
-        {/* =====================================================================
-            SLIDE 15: SILVER OVAL FRAME & 20-PHOTO GRID
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s15_silver_frame_grid.webp"
-            alt="Silver Frame and 20 Photo Portfolio Grid"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 16: WHERE OUR STORIES HAVE UNFOLDED (9 SINGAPORE VENUES)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s16_venues_bg.webp"
-            alt="Where Our Stories Have Unfolded Singapore Venues"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Heading */}
-          <div className="absolute inset-x-0 top-[4.5%] px-4 text-center">
-            <h2
-              className="text-[31px] leading-[0.96] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
+          {/* (001), (002), (003), (004) Labels (Arial Bold) */}
+          {timelessSection.photoLabels.map((lbl, idx) => (
+            <Reveal
+              key={idx}
+              delay={idx * 90}
+              className="absolute text-[1.74cqw] leading-none font-bold tracking-[-0.01em] text-[#1b1b1b]"
+              style={{
+                ...ARIAL_STYLE,
+                top: lbl.top,
+                left: lbl.left,
+              }}
             >
-              <span className="font-semibold italic">
-                {siteConfig.venues.titleLine1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.venues.titleLine1Regular}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.venues.titleLine2Regular}
-              </span>
-            </h2>
-          </div>
+              {lbl.id}
+            </Reveal>
+          ))}
 
-          {/* Row 1 Captions */}
-          <div className="absolute inset-x-0 top-[31.4%] grid grid-cols-3 px-[4.4%] text-left font-sans text-[11.2px] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.venues.row1.map((name, idx) => (
-              <span
-                key={idx}
-                className={idx === 1 ? "pl-[6%]" : idx === 2 ? "pl-[11%]" : ""}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-
-          {/* Row 2 Captions */}
-          <div className="absolute inset-x-0 top-[57.4%] grid grid-cols-3 px-[4.4%] text-left font-sans text-[11.2px] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.venues.row2.map((name, idx) => (
-              <span
-                key={idx}
-                className={idx === 1 ? "pl-[6%]" : idx === 2 ? "pl-[11%]" : ""}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-
-          {/* Row 3 Captions */}
-          <div className="absolute inset-x-0 top-[83.8%] grid grid-cols-3 px-[4.4%] text-left font-sans text-[11.2px] font-light tracking-[-0.015em] text-white/95">
-            {siteConfig.venues.row3.map((name, idx) => (
-              <span
-                key={idx}
-                className={idx === 1 ? "pl-[6%]" : idx === 2 ? "pl-[11%]" : ""}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 17: 5 CINEMATIC WIDESCREEN STILLS
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s17_cinematic_stills.webp"
-            alt="Cinematic Widescreen Stills"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 18: WHERE MAGIC BREATHES A MASTERPIECE (5 FILM POLAROIDS)
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s18_polaroids_bg.webp"
-            alt="Where Magic Breathes a Masterpiece Polaroids"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Quote */}
-          <div className="absolute inset-x-0 top-[3.5%] px-4 text-center">
-            <h2
-              className="text-[31px] leading-[0.96] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
+          {/* 3 Tilted Vertical Cards with 3D Sway & Float Animation */}
+          {SLIDE2_TILTED_CARDS.map((card) => (
+            <Reveal
+              key={card.name}
+              delay={card.delay}
+              direction={card.direction}
+              className="absolute"
+              style={{ top: card.top, left: card.left, width: card.width }}
             >
-              <span className="font-semibold">
-                {siteConfig.polaroidsQuote.line1Regular}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.polaroidsQuote.line1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.polaroidsQuote.line1Suffix}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.polaroidsQuote.line2Regular}
-              </span>
-            </h2>
-          </div>
-        </section>
+              <img
+                src={card.src}
+                alt={card.name}
+                className={`${card.animClass} block h-auto w-full select-none`}
+                loading="lazy"
+              />
+            </Reveal>
+          ))}
 
-        {/* =====================================================================
-            SLIDE 19: PACKAGE DETAILS + PROMO ENDS IN GRAPHIC
-           ===================================================================== */}
-        <section id="pakej" className="relative w-full bg-[#120b07]">
-          {/* Top Textured Header with "Package Details" */}
-          <div className="relative w-full">
-            <img
-              src="images/sg1999/s19_top_bg.webp"
-              alt="Package Details Header"
-              className="block h-auto w-full select-none"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <h2
-                className="text-[33px] leading-none tracking-[-0.04em] text-white"
-                style={SERIF_STYLE}
-              >
-                <span className="font-semibold italic">
-                  {siteConfig.packageDetails.sectionTitleItalic}
-                </span>
-                <span className="font-semibold">
-                  {siteConfig.packageDetails.sectionTitleRegular}
-                </span>
-              </h2>
-            </div>
-          </div>
-
-          {/* Editable HTML Package Details Card */}
-          <PackageCard pkg={siteConfig.packageDetails} />
-
-          {/* Bottom "PROMO ENDS IN" Glowing 3D Metallic Graphic */}
-          <div className="relative w-full bg-[#090909]">
-            <img
-              src="images/sg1999/s19_promo_ends_in.webp"
-              alt="Promo Ends In"
-              className="block h-auto w-full select-none"
-              loading="lazy"
-            />
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 20: LIVE COUNTDOWN + DEPOSIT SERENDAH 300 SGD + CTA BUTTON
-           ===================================================================== */}
-        <PromoCountdownSection />
-
-        <section className="relative w-full bg-[#090909]">
-          <img
-            src="images/sg1999/s20_deposit_bg.webp"
-            alt="Deposit Serendah 300 SGD"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Crimson Banner Text ("ini tempoh promosi akan berakhir!") with Looping Upward Arrows */}
-          <div className="absolute inset-x-0 top-[2.2%] flex h-[12.2%] items-center justify-center gap-3.5 px-4 text-center font-sans text-[21px] leading-[1.1] font-bold tracking-[-0.025em] text-white">
-            {/* Left Looping Upward Arrow */}
-            <div className="relative flex h-11 w-7 flex-col items-center justify-center overflow-hidden">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="animate-arrow-up-loop h-6 w-6 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-              >
-                <path d="M12 19V5" />
-                <path d="m5 12 7-7 7 7" />
-              </svg>
-            </div>
-
-            <p>
-              <span>{siteConfig.depositSection.bannerLine1}</span>
-              <br />
-              <span>{siteConfig.depositSection.bannerLine2}</span>
-            </p>
-
-            {/* Right Looping Upward Arrow */}
-            <div className="relative flex h-11 w-7 flex-col items-center justify-center overflow-hidden">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="animate-arrow-up-loop h-6 w-6 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-              >
-                <path d="M12 19V5" />
-                <path d="m5 12 7-7 7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* 3D Dark Glass Card Content ("Deposit Serendah 300 SGD") */}
-          <div className="absolute top-[24.2%] right-[10%] left-[11.2%] flex flex-col items-start text-left">
-            <h2 className="font-sans text-[24px] leading-[1.12] font-bold tracking-[-0.025em] text-white">
-              <span>{siteConfig.depositSection.titleLine1}</span>
-              <br />
-              <span>{siteConfig.depositSection.titleLine2}</span>
-            </h2>
-
-            <div className="mt-[22px] space-y-[18px] font-sans text-[14.5px] leading-[1.32] font-light tracking-[-0.015em] text-white/95">
-              <p className="whitespace-pre-line">
-                {siteConfig.depositSection.para1}
-              </p>
-
-              <p className="whitespace-pre-line">
-                {siteConfig.depositSection.para2}
-              </p>
-
-              <p className="pt-[4px] whitespace-pre-line">
-                {siteConfig.depositSection.para3Label}
-              </p>
-
-              <p className="whitespace-pre-line">
-                <span className="font-bold text-white">
-                  {siteConfig.depositSection.paymentLine1Bold1}
-                </span>
-                <span>{siteConfig.depositSection.paymentLine1Regular}</span>
-                <span className="font-bold text-white">
-                  {siteConfig.depositSection.paymentLine1Bold2}
-                </span>
-                <br />
-                <span className="font-bold text-white">
-                  {siteConfig.depositSection.paymentLine2Bold1}
-                </span>
-                <span>{siteConfig.depositSection.paymentLine2Regular1}</span>
-                <span className="font-bold text-white">
-                  {siteConfig.depositSection.paymentLine2Bold2}
-                </span>
-                <span>{siteConfig.depositSection.paymentLine2Regular2}</span>
-                <span className="font-bold text-white">
-                  {siteConfig.depositSection.paymentLine2Bold3}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* Clickable 3D Glassmorphic Pill Button ("Nak Book Segera!") */}
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute inset-x-[11%] top-[84.6%] flex h-[11.2%] items-center justify-center rounded-full transition-transform active:scale-95"
+          {/* Floating Heart Like Pill Badge ("❤️ 1") */}
+          <Reveal
+            delay={320}
+            direction="scale"
+            className="absolute z-10"
+            style={{ top: "43.010%", left: "48.135%", width: "8.275%" }}
           >
-            <span className="font-sans text-[22px] font-bold tracking-[-0.025em] text-white">
-              {siteConfig.depositSection.ctaButtonText}
-            </span>
-          </a>
+            <img
+              src="images/preweds/s2_heart.webp"
+              alt="Heart 1"
+              className="animate-heart-bounce block h-auto w-full select-none"
+              loading="lazy"
+            />
+          </Reveal>
+
+          {/* 7 Beach Collage Photos under "Films & Moments" */}
+          {SLIDE2_BEACH_COLLAGE.map((c) => (
+            <Reveal
+              key={c.name}
+              delay={c.delay}
+              direction={c.direction}
+              className="absolute"
+              style={{ top: c.top, left: c.left, width: c.width }}
+            >
+              <img
+                src={c.src}
+                alt={c.name}
+                className={`${c.animClass} block h-auto w-full select-none`}
+                loading="lazy"
+              />
+            </Reveal>
+          ))}
+
+          {/* Bottom "Aesthetic" Label (Arial Regular) */}
+          <Reveal
+            delay={150}
+            className="absolute top-[82.85%] left-[21.06%] text-[3.02cqw] leading-none font-normal tracking-[-0.02em] text-[#1b1b1b]"
+            style={ARIAL_STYLE}
+          >
+            {timelessSection.aestheticLabel}
+          </Reveal>
         </section>
 
         {/* =====================================================================
-            SLIDE 21: KHAS UNTUK PROMO KALI INI SAHAJA! FREE E-KAD RSVP 20 SGD
+            SECTION 2B (NEW): 3 PREWEDS HIGHLIGHT VIDEOS (ULTRA-FAST STREAMING)
+            - Iqmarl & Shaqina, Aiman & Khaireen, Natasha & Daniel
+            - 15KB WebP Poster + 200KB Lazy 6s Loop + FastStart HD MP4
+           ===================================================================== */}
+        <PrewedsVideoShowcaseSection />
+
+        {/* =====================================================================
+            SECTION 3 (3.svg): AFFORDABLE WITHOUT LESS + HOW WE DELIVERS?
+            - Original Title Graphics in s3_bg.webp
+            - 5 Pills & 5 Timeline Steps Body Text in Real Editable Arial
            ===================================================================== */}
         <section className="relative w-full">
           <img
-            src="images/sg1999/s21_rsvp_bg.webp"
-            alt="Free E-Kad RSVP Bernilai 20 SGD"
+            src="images/preweds/s3_bg.webp"
+            alt="Affordable Without Less & How We Delivers"
             className="block h-auto w-full select-none"
             loading="lazy"
           />
 
-          {/* Top Heading */}
-          <div className="absolute inset-x-0 top-[5.8%] text-center font-sans text-[20px] leading-[1.2] font-light tracking-[-0.02em] text-white/95">
-            <p>{siteConfig.rsvpOffer.topLine1}</p>
-            <p>{siteConfig.rsvpOffer.topLine2}</p>
-          </div>
+          {/* 6 Feature Pills Text (Arial Body Text with Bold Highlights, Vertically Centered in Oval) */}
+          {affordableSection.pills.map((pill, idx) => (
+            <Reveal
+              key={idx}
+              delay={idx * 90}
+              direction={idx % 2 === 1 ? "right" : "left"}
+              className="absolute flex flex-col justify-center text-left text-[4.77cqw] leading-[1.08] tracking-[-0.02em] text-black"
+              style={{
+                ...ARIAL_STYLE,
+                top: pill.top,
+                height: pill.height || "5.19%",
+                left: pill.left,
+              }}
+            >
+              <p>
+                <RichTextLine segments={pill.line1} />
+              </p>
+              <p>
+                <RichTextLine segments={pill.line2} />
+              </p>
+            </Reveal>
+          ))}
 
-          {/* 3D Pill Text ("E-Kad RSVP" bold + "Bernilai 20 SGD!" light) */}
-          <div className="absolute inset-x-[17%] top-[25.9%] flex h-[10.3%] flex-col items-center justify-center text-center font-sans text-[22px] leading-[1.15] tracking-[-0.025em] text-white">
-            <span className="font-bold">
-              {siteConfig.rsvpOffer.pillLine1Bold}
-            </span>
-            <span className="font-light text-white/95">
-              {siteConfig.rsvpOffer.pillLine2Light}
-            </span>
-          </div>
+          {/* 5 Timeline Steps Text (Arial Bold) */}
+          {affordableSection.timelineSteps.map((step, idx) => (
+            <Reveal
+              key={idx}
+              delay={idx * 100}
+              direction="right"
+              className="absolute text-left text-[4.77cqw] leading-[1.04] font-bold tracking-[-0.02em] text-black"
+              style={{
+                ...ARIAL_STYLE,
+                top: step.top,
+                left: step.left,
+              }}
+            >
+              <p>{step.line1}</p>
+              <p>{step.line2}</p>
+            </Reveal>
+          ))}
         </section>
 
         {/* =====================================================================
-            SLIDE 22: FEEDBACK & TESTIMONI 1
+            SECTION 4 (NEW): URGENCY, PRICE CUT ($899 -> $699), 3 FREE GIFTS,
+            COUNTDOWN TIMER & WHATSAPP NOW CTA
            ===================================================================== */}
-        <section className="relative w-full">
+        <UrgencyOfferSection waUrl={waUrl} timeLeft={timeLeft} />
+
+        {/* =====================================================================
+            SECTION 5 (4.svg): FEEDBACK & TESTIMONI + MORE FEEDBACK!
+            - Original Title Graphics in s4_bg.webp
+            - 13 Individual Animated WhatsApp Feedback Card Layers
+           ===================================================================== */}
+        <section className="relative w-full overflow-hidden">
           <img
-            src="images/sg1999/s22_feedback_bg.webp"
+            src="images/preweds/s4_bg.webp"
             alt="Feedback & Testimoni"
             className="block h-auto w-full select-none"
             loading="lazy"
           />
 
-          {/* Top Pill Overlay Text (Bold Sans-Serif + Light Subtitle) */}
-          <div className="absolute inset-x-[10%] top-[3.3%] flex h-[10.3%] flex-col items-center justify-center text-center font-sans">
-            <h2 className="text-[24px] leading-none font-bold tracking-[-0.025em] text-white">
-              {siteConfig.testimonials.slide22TitleBold}
-            </h2>
-            <p className="mt-1.5 text-[15px] leading-none font-light tracking-[-0.015em] text-white/95">
-              {siteConfig.testimonials.slide22Subtitle}
-            </p>
-          </div>
-        </section>
-
-        {/* =====================================================================
-            SLIDE 23: FEEDBACK & TESTIMONI 2
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s23_feedback_bg.webp"
-            alt="Feedback Testimoni WhatsApp 2"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-        </section>
-
-        {/* =====================================================================
-            SLIDE 24: NO WORRIES RAMAI LAGI WE DELIVER TAU!
-           ===================================================================== */}
-        <section className="relative w-full">
-          <img
-            src="images/sg1999/s24_feedback_bg.webp"
-            alt="No Worries Ramai Lagi We Deliver Tau"
-            className="block h-auto w-full select-none"
-            loading="lazy"
-          />
-
-          {/* Top Pill Overlay Text */}
-          <div className="absolute inset-x-[10%] top-[3.3%] flex h-[10.3%] flex-col items-center justify-center text-center">
-            <h2
-              className="text-[28px] leading-[0.98] tracking-[-0.04em] text-white"
-              style={SERIF_STYLE}
+          {SLIDE4_FEEDBACK_LAYERS.map((card) => (
+            <Reveal
+              key={card.name}
+              delay={card.delay}
+              direction={card.direction}
+              className="absolute"
+              style={{ top: card.top, left: card.left, width: card.width }}
             >
-              <span className="font-semibold">
-                {siteConfig.testimonials.slide24Line1Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.testimonials.slide24Line1Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.testimonials.slide24Line1Suffix}
-              </span>
-              <br />
-              <span className="font-semibold">
-                {siteConfig.testimonials.slide24Line2Prefix}
-              </span>
-              <span className="font-semibold italic">
-                {siteConfig.testimonials.slide24Line2Italic}
-              </span>
-              <span className="font-semibold">
-                {siteConfig.testimonials.slide24Line2Suffix}
-              </span>
-            </h2>
-          </div>
+              <img
+                src={card.src}
+                alt={card.name}
+                className={`${card.animClass} block h-auto w-full select-none`}
+                loading="lazy"
+              />
+            </Reveal>
+          ))}
         </section>
 
-        {/* =====================================================================
-            SLIDES 25 & 26: FREQUENT ASK QUESTION (OPEN Q&A WITH WHITE DIVIDERS)
-           ===================================================================== */}
-        <section className="relative w-full bg-[#000000] pb-16">
-          {/* Top 3D Glassmorphic Pill Header */}
-          <div className="relative w-full">
-            <img
-              src="images/sg1999/s25_pill_header.webp"
-              alt="Frequent Ask Question"
-              className="block h-auto w-full select-none"
-              loading="lazy"
-            />
-            <div className="absolute inset-x-[15%] top-[16%] flex h-[74%] flex-col items-center justify-center text-center">
-              <h2 className="font-sans text-[23px] leading-[1.12] font-bold tracking-[-0.025em] text-white">
-                <span>{siteConfig.faq.headerLine1}</span>
-                <br />
-                <span>{siteConfig.faq.headerLine2}</span>
-              </h2>
-            </div>
-          </div>
-
-          {/* Open FAQ Items with Horizontal White Lines */}
-          <div className="mx-auto max-w-[360px] divide-y divide-white/80 px-4">
-            {siteConfig.faq.items.map((item, idx) => (
-              <div key={idx} className="py-6 text-left">
-                <h3 className="font-sans text-[16.5px] leading-[1.25] font-bold tracking-[-0.015em] whitespace-pre-line text-white">
-                  {item.question}
-                </h3>
-                <p className="mt-3.5 font-sans text-[14.5px] leading-[1.35] font-light tracking-[-0.015em] whitespace-pre-line text-white/95">
-                  {item.answer}
-                </p>
-                {item.bullets && (
-                  <ul className="mt-4 list-disc space-y-2 pl-5 font-sans text-[14.5px] leading-[1.35] font-light tracking-[-0.015em] text-white/95">
-                    {item.bullets.map((b, bIdx) => (
-                      <li key={bIdx} className="whitespace-pre-line">
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Bottom Final WhatsApp Now CTA Section */}
+        <section className="w-full bg-white px-[6.5%] pt-4 pb-12">
+          <Reveal delay={100}>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-black bg-[#fffbf2] py-4 text-[4.8cqw] font-bold tracking-[-0.01em] text-black shadow-[0_5px_0_#1b1b1b] transition-all hover:-translate-y-0.5 hover:bg-[#e1cfe1]/60 active:translate-y-0.5"
+            >
+              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="animate-shimmer-sweep block h-full w-1/3 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+              </span>
+              <WhatsAppIcon className="relative h-[5.4cqw] w-[5.4cqw] text-[#25D366] transition-transform duration-300 group-hover:scale-115" />
+              <span className="relative">{urgencySection.ctaButtonText}</span>
+            </a>
+          </Reveal>
         </section>
       </main>
     </div>

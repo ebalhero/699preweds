@@ -6,5 +6,7 @@ d12-pip/
 public/slides/
 public/images/*
 !public/images/sg/
-src/components/
+!public/images/preweds/
+src/components/*
+!src/components/DesignVectors.jsx
 src/lib/

@@ -63,6 +63,22 @@ function githubPagesRootSyncPlugin() {
           fs.copyFileSync(path.join(srcSg1999, f), path.join(dstSg1999, f));
         }
       }
+      const srcPreweds = path.resolve(__dirname, 'public/images/preweds');
+      const dstPreweds = path.resolve(__dirname, 'images/preweds');
+      if (fs.existsSync(srcPreweds)) {
+        fs.mkdirSync(dstPreweds, { recursive: true });
+        for (const f of fs.readdirSync(srcPreweds)) {
+          fs.copyFileSync(path.join(srcPreweds, f), path.join(dstPreweds, f));
+        }
+      }
+      const srcVideos = path.resolve(__dirname, 'public/videos');
+      const dstVideos = path.resolve(__dirname, 'videos');
+      if (fs.existsSync(srcVideos)) {
+        fs.mkdirSync(dstVideos, { recursive: true });
+        for (const f of fs.readdirSync(srcVideos)) {
+          fs.copyFileSync(path.join(srcVideos, f), path.join(dstVideos, f));
+        }
+      }
     },
   };
 }

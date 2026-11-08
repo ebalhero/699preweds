@@ -17,10 +17,46 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b1b1b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z'/><circle cx='12' cy='13' r='3'/></svg>" />
-                        <script type="module" crossorigin src="./assets/app.js"></script>
-                        <link rel="stylesheet" crossorigin href="./assets/app.css">
-                      </head>
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(
+        window, document, 'script',
+        'https://connect.facebook.net/en_US/fbevents.js'
+      );
+
+      fbq('init', '3979472965529393');
+      fbq('track', 'PageView');
+
+      document.addEventListener('click', function (event) {
+        var link = event.target.closest(
+          'a[href*="wa.me"], a[href*="api.whatsapp.com"]'
+        );
+
+        if (link && typeof window.fbq === 'function') {
+          window.fbq('track', 'Contact', {
+            content_name: '$699 Preweds / Postweds WhatsApp enquiry',
+            content_category: 'website_cta'
+          });
+        }
+      });
+    </script>
+    <!-- End Meta Pixel Code -->
+                          <script type="module" crossorigin src="./assets/app.js"></script>
+                          <link rel="stylesheet" crossorigin href="./assets/app.css">
+                        </head>
   <body class="bg-white text-[#1b1b1b] font-sans antialiased selection:bg-[#1b1b1b] selection:text-white">
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        alt=""
+        src="https://www.facebook.com/tr?id=3979472965529393&ev=PageView&noscript=1"
+      />
+    </noscript>
     <div id="root"></div>
   </body>
 </html>
